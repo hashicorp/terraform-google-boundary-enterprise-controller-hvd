@@ -1,0 +1,35 @@
+# ---Common --- #
+friendly_name_prefix = "<acme>" #This should be unique across all deployments
+common_labels = {
+  App   = "<boundary-controller>"
+  Env   = "<sandbox>"
+  Owner = "<YourName>"
+}
+
+# --- prereqs --- #
+project_id                                = "<project-id>"
+region                                    = "<us-east1>"
+boundary_license_secret_id                = "<boundary-license>"
+boundary_tls_cert_secret_id               = "<boundary-tls-cert-base64>"
+boundary_tls_privkey_secret_id            = "<boundary-tls-privkey-base64>"
+boundary_tls_ca_bundle_secret_id          = "<boundary-tls-ca-bundle-base64>"
+boundary_database_password_secret_version = "<boundary-database-password>"
+
+# ---Boundary configuration settings --- #
+boundary_fqdn    = "<boundary.google.example.com>"
+boundary_version = "0.17.1+ent"
+
+# --- Networking --- #
+vpc                     = "<my-vpc-name>"
+subnet_name             = "<my-subnet-name>"
+api_load_balancing_scheme   = "<external>"
+cidr_ingress_9200_allow = ["<my-personal-public-ip>", "<other-end-users>"]
+cidr_ingress_9201_allow = ["<worker-subnet-cidr>"]
+
+# --- DNS (optional) --- #
+create_cloud_dns_record = <true>
+cloud_dns_managed_zone  = "<managed-zone>"
+
+# --- Compute --- #
+enable_iap     = <true>
+instance_count = <1>
