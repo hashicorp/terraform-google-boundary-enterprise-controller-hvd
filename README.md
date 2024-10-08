@@ -1,6 +1,6 @@
-# Boundary Controller on Google
+# Boundary Enterprise Controller HVD on GCP GCE
 
-Terraform module used by HashiCorp Professional Services to deploy Boundary Controller on Google. For deploying workers, please see the [Boundary Workers on Google](https://github.com/hashicorp-services/terraform-google-boundary-worker) module. Prior to deploying in production, the code should be reviewed, potentially tweaked/customized, and tested in a non-production environment.
+Terraform module aligned with HashiCorp Validated Designs (HVD) to deploy Boundary Enterprise Controller(s) on Google Cloud Platform (GCP) using Compute Engine instances. This module is designed to work with the complimentary [Boundary Enterprise Worker HVD on GCP GCE](https://github.com/hashicorp/terraform-google-boundary-enterprise-worker-hvd) module.
 
 <!-- ## Boundary Architecture
 
@@ -58,77 +58,78 @@ One of the following mechanisms for shell access to Boundary VM instances:
 
 1. Create/configure/validate the applicable [prerequisites](#prerequisites).
 
-2. Nested within the [examples](./examples/) directory are subdirectories that contain ready-made Terraform configurations of example scenarios for how to call and deploy this module. To get started, choose an example scenario. If you are not sure which example scenario to start with, then we recommend starting with the [default](examples/default) example.
+1. Nested within the [examples](./examples/) directory are subdirectories that contain ready-made Terraform configurations of example scenarios for how to call and deploy this module. To get started, choose an example scenario. If you are not sure which example scenario to start with, then we recommend starting with the [default](examples/default) example.
 
-3. Copy all of the Terraform files from your example scenario of choice into a new destination directory to create your root Terraform configuration that will manage your Boundary deployment. If you are not sure where to create this new directory, it is common for us to see users create an `environments/` directory at the root of this repo, and then a subdirectory for each Boundary instance deployment, like so:
+1. Copy all of the Terraform files from your example scenario of choice into a new destination directory to create your root Terraform configuration that will manage your Boundary deployment. If you are not sure where to create this new directory, it is common for us to see users create an `environments/` directory at the root of this repo, and then a subdirectory for each Boundary instance deployment, like so:
 
-```sh
-.
-└── environments
-    ├── production
-    │   ├── backend.tf
-    │   ├── main.tf
-    │   ├── outputs.tf
-    │   ├── terraform.tfvars
-    │   └── variables.tf
-    └── sandbox
-        ├── backend.tf
-        ├── main.tf
-        ├── outputs.tf
-        ├── terraform.tfvars
-        └── variables.tf
-```
+    ```sh
+    .
+    └── environments
+        ├── production
+        │   ├── backend.tf
+        │   ├── main.tf
+        │   ├── outputs.tf
+        │   ├── terraform.tfvars
+        │   └── variables.tf
+        └── sandbox
+            ├── backend.tf
+            ├── main.tf
+            ├── outputs.tf
+            ├── terraform.tfvars
+            └── variables.tf
+    ```
 
-  >📝 Note: in this example, the user will have two separate Boundary deployments; one for their `sandbox` environment, and one for their `production` environment. This is recommended, but not required.
+    >📝 Note: in this example, the user will have two separate Boundary deployments; one for their `sandbox` environment, and one for their `production` environment. This is recommended, but not required.
 
-4. (Optional) Uncomment and update the [gcs remote state backend](https://developer.hashicorp.com/terraform/language/settings/backends/gcs) configuration provided in the `backend.tf` file with your own custom values. While this step is highly recommended, it is technically not required to use a remote backend config for your Boundary deployment.
+1. (Optional) Uncomment and update the [gcs remote state backend](https://developer.hashicorp.com/terraform/language/settings/backends/gcs) configuration provided in the `backend.tf` file with your own custom values. While this step is highly recommended, it is technically not required to use a remote backend config for your Boundary deployment.
 
-5. Populate your own custom values into the `terraform.tfvars.example` file that was provided, and remove the `.example` file extension such that the file is now named `terraform.tfvars`.
+1. Populate your own custom values into the `terraform.tfvars.example` file that was provided, and remove the `.example` file extension such that the file is now named `terraform.tfvars`.
 
-6. Navigate to the directory of your newly created Terraform configuration for your Boundary Controller deployment, and run `terraform init`, `terraform plan`, and `terraform apply`.
+1. Navigate to the directory of your newly created Terraform configuration for your Boundary Controller deployment, and run `terraform init`, `terraform plan`, and `terraform apply`.
 
-7. After your `terraform apply` finishes successfully, you can monitor the installation progress by connecting to your Boundary VM instance shell via SSH or Google IAP and observing the cloud-init (user_data) logs:
+1. After your `terraform apply` finishes successfully, you can monitor the installation progress by connecting to your Boundary VM instance shell via SSH or Google IAP and observing the cloud-init (user_data) logs:
 
-   Higher-level logs:
+    Higher-level logs:
 
-   ```sh
-   tail -f /var/log/boundary-cloud-init.log
-   ```
+    ```sh
+    tail -f /var/log/boundary-cloud-init.log
+    ```
 
-   Lower-level logs:
+    Lower-level logs:
 
-   ```sh
-   journalctl -xu cloud-final -f
-   ```
+    ```sh
+    journalctl -xu cloud-final -f
+    ```
 
-   >📝 Note: the `-f` argument is to follow the logs as they append in real-time, and is optional. You may remove the `-f` for a static view.
+    >📝 Note: the `-f` argument is to follow the logs as they append in real-time, and is optional. You may remove the `-f` for a static view.
 
-   The log files should display the following message after the cloud-init (user_data) script finishes successfully:
+    The log files should display the following message after the cloud-init (user_data) script finishes successfully:
 
-   ```sh
-   [INFO] boundary_custom_data script finished successfully!
-   ```
+    ```sh
+    [INFO] boundary_custom_data script finished successfully!
+    ```
 
-8.  Once the cloud-init script finishes successfully, while still connected to the VM via SSH you can check the status of the boundary service:
+1. Once the cloud-init script finishes successfully, while still connected to the VM via SSH you can check the status of the boundary service:
 
-   ```sh
-   sudo systemctl status boundary
-   ```
+    ```sh
+    sudo systemctl status boundary
+    ```
 
-9. After the Boundary Controller is deployed the Boundary system will be partially initialized. To complete the initialization process and setup an initial auth method, username and password, please use the [terraform-boundary-bootstrap-hvd](https://registry.terraform.io/modules/hashicorp/boundary-bootstrap-hvd/boundary/latest) module
+1. After the Boundary Controller is deployed the Boundary system will be partially initialized. To complete the initialization process and setup an initial auth method, username and password, please use the [terraform-boundary-bootstrap-hvd](https://registry.terraform.io/modules/hashicorp/boundary-bootstrap-hvd/boundary/latest) module
 
-10. Use the [terraform-google-boundary-worker-hvd](https://registry.terraform.io/modules/hashicorp/boundary-enterprise-worker-hvd/google/latest) module to deploy ingress, egress, etc workers as needed.
+1. Use the [terraform-google-boundary-worker-hvd](https://registry.terraform.io/modules/hashicorp/boundary-enterprise-worker-hvd/google/latest) module to deploy ingress, egress, etc workers as needed.
 
 ## Docs
 
 Below are links to docs pages related to deployment customizations and day 2 operations of your Boundary Controller instance.
 
-- [Deployment Customizations](./docs/deployment-customizations.md)
-- [Upgrading Boundary version](./docs/boundary-version-upgrades.md)
-- [Rotating Boundary TLS/SSL certificates](./docs/boundary-cert-rotation.md)
-- [Updating/modifying Boundary configuration settings](./docs/boundary-config-settings.md)
-- [Authenticate to Boundary Cluster with Boundary CLI](./docs/boundary-cli-auth.md)
+- [Deployment Customizations](https://github.com/hashicorp/terraform-google-boundary-enterprise-controller-hvd/blob/main/docs/deployment-customizations.md)
+- [Upgrading Boundary version](https://github.com/hashicorp/terraform-google-boundary-enterprise-controller-hvd/blob/main/docs/boundary-version-upgrades.md)
+- [Rotating Boundary TLS/SSL certificates](https://github.com/hashicorp/terraform-google-boundary-enterprise-controller-hvd/blob/main/docs/boundary-cert-rotation.md)
+- [Updating/modifying Boundary configuration settings](https://github.com/hashicorp/terraform-google-boundary-enterprise-controller-hvd/blob/main/docs/boundary-config-settings.md)
+- [Authenticate to Boundary Cluster with Boundary CLI](https://github.com/hashicorp/terraform-google-boundary-enterprise-controller-hvd/blob/main/docs/boundary-cli-auth.md)
 
+<!-- BEGIN_TF_DOCS -->
 ## Module support
 
 This open source software is maintained by the HashiCorp Technical Field Organization, independently of our enterprise products. While our Support Engineering team provides dedicated support for our enterprise offerings, this open source software is not included.
@@ -138,7 +139,6 @@ This open source software is maintained by the HashiCorp Technical Field Organiz
 
 Please note that there is no official Service Level Agreement (SLA) for support of this software as a HashiCorp customer. This software falls under the definition of Community Software/Versions in your Agreement. We appreciate your understanding and collaboration in improving our open source projects.
 
-<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -246,22 +246,17 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_boundary_fqdn"></a> [boundary\_fqdn](#input\_boundary\_fqdn) | Fully qualified domain name of boundary instance. This name should resolve to the load balancer IP address and will be what clients use to access boundary. | `string` | n/a | yes |
-| <a name="input_boundary_license_secret_id"></a> [boundary\_license\_secret\_id](#input\_boundary\_license\_secret\_id) | ID of Secrets Manager secret for Boundary license file. | `string` | n/a | yes |
-| <a name="input_boundary_tls_cert_secret_id"></a> [boundary\_tls\_cert\_secret\_id](#input\_boundary\_tls\_cert\_secret\_id) | ID of Secrets Manager secret for Boundary TLS certificate in PEM format. Secret must be stored as a base64-encoded string. | `string` | n/a | yes |
-| <a name="input_boundary_tls_privkey_secret_id"></a> [boundary\_tls\_privkey\_secret\_id](#input\_boundary\_tls\_privkey\_secret\_id) | ID of Secrets Manager secret for Boundary TLS private key in PEM format. Secret must be stored as a base64-encoded string. | `string` | n/a | yes |
-| <a name="input_friendly_name_prefix"></a> [friendly\_name\_prefix](#input\_friendly\_name\_prefix) | Friendly name prefix used for uniquely naming resources. This should be unique across all deployments | `string` | n/a | yes |
-| <a name="input_project_id"></a> [project\_id](#input\_project\_id) | ID of GCP Project to create resources in. | `string` | n/a | yes |
-| <a name="input_region"></a> [region](#input\_region) | Region of GCP Project to create resources in. | `string` | n/a | yes |
-| <a name="input_subnet_name"></a> [subnet\_name](#input\_subnet\_name) | Existing VPC subnetwork for Boundary instance(s) and optionally Boundary frontend load balancer. | `string` | n/a | yes |
-| <a name="input_vpc"></a> [vpc](#input\_vpc) | Existing VPC network to deploy Boundary resources into. | `string` | n/a | yes |
 | <a name="input_additional_package_names"></a> [additional\_package\_names](#input\_additional\_package\_names) | List of additional repository package names to install | `set(string)` | `[]` | no |
 | <a name="input_api_load_balancing_scheme"></a> [api\_load\_balancing\_scheme](#input\_api\_load\_balancing\_scheme) | Determines whether API load balancer is internal-facing or external-facing. | `string` | `"internal"` | no |
 | <a name="input_boundary_database_name"></a> [boundary\_database\_name](#input\_boundary\_database\_name) | Name of boundary PostgreSQL database to create. | `string` | `"boundary"` | no |
 | <a name="input_boundary_database_password_secret_version"></a> [boundary\_database\_password\_secret\_version](#input\_boundary\_database\_password\_secret\_version) | Name of PostgreSQL database password secret to retrieve from GCP Secret Manager. | `string` | `null` | no |
 | <a name="input_boundary_database_user"></a> [boundary\_database\_user](#input\_boundary\_database\_user) | Name of boundary PostgreSQL database user to create. | `string` | `"boundary"` | no |
+| <a name="input_boundary_fqdn"></a> [boundary\_fqdn](#input\_boundary\_fqdn) | Fully qualified domain name of boundary instance. This name should resolve to the load balancer IP address and will be what clients use to access boundary. | `string` | n/a | yes |
+| <a name="input_boundary_license_secret_id"></a> [boundary\_license\_secret\_id](#input\_boundary\_license\_secret\_id) | ID of Secrets Manager secret for Boundary license file. | `string` | n/a | yes |
 | <a name="input_boundary_tls_ca_bundle_secret_id"></a> [boundary\_tls\_ca\_bundle\_secret\_id](#input\_boundary\_tls\_ca\_bundle\_secret\_id) | ID of Secrets Manager secret for private/custom TLS Certificate Authority (CA) bundle in PEM format. Secret must be stored as a base64-encoded string. | `string` | `null` | no |
+| <a name="input_boundary_tls_cert_secret_id"></a> [boundary\_tls\_cert\_secret\_id](#input\_boundary\_tls\_cert\_secret\_id) | ID of Secrets Manager secret for Boundary TLS certificate in PEM format. Secret must be stored as a base64-encoded string. | `string` | n/a | yes |
 | <a name="input_boundary_tls_disable"></a> [boundary\_tls\_disable](#input\_boundary\_tls\_disable) | Boolean to disable TLS for boundary. | `bool` | `false` | no |
+| <a name="input_boundary_tls_privkey_secret_id"></a> [boundary\_tls\_privkey\_secret\_id](#input\_boundary\_tls\_privkey\_secret\_id) | ID of Secrets Manager secret for Boundary TLS private key in PEM format. Secret must be stored as a base64-encoded string. | `string` | n/a | yes |
 | <a name="input_boundary_version"></a> [boundary\_version](#input\_boundary\_version) | Version of Boundary to install. | `string` | `"0.17.1+ent"` | no |
 | <a name="input_bsr_gcs_force_destroy"></a> [bsr\_gcs\_force\_destroy](#input\_bsr\_gcs\_force\_destroy) | Boolean indicating whether to allow force destroying the TFE GCS bucket. GCS bucket can be destroyed if it is not empty when `true`. | `bool` | `false` | no |
 | <a name="input_bsr_gcs_kms_key_name"></a> [bsr\_gcs\_kms\_key\_name](#input\_bsr\_gcs\_kms\_key\_name) | Name of Cloud KMS customer managed encryption key (CMEK) to use for TFE GCS bucket encryption. | `string` | `null` | no |
@@ -285,6 +280,7 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | <a name="input_disk_size_gb"></a> [disk\_size\_gb](#input\_disk\_size\_gb) | Size in Gigabytes of root disk of Boundary instance(s). | `number` | `50` | no |
 | <a name="input_enable_iap"></a> [enable\_iap](#input\_enable\_iap) | (Optional bool) Enable https://cloud.google.com/iap/docs/using-tcp-forwarding#console, defaults to `true`. | `bool` | `true` | no |
 | <a name="input_enable_session_recording"></a> [enable\_session\_recording](#input\_enable\_session\_recording) | Boolean to enable session recording in Boundary. | `bool` | `false` | no |
+| <a name="input_friendly_name_prefix"></a> [friendly\_name\_prefix](#input\_friendly\_name\_prefix) | Friendly name prefix used for uniquely naming resources. This should be unique across all deployments | `string` | n/a | yes |
 | <a name="input_image_name"></a> [image\_name](#input\_image\_name) | VM image for Boundary instance(s). | `string` | `"ubuntu-2404-noble-amd64-v20240607"` | no |
 | <a name="input_image_project"></a> [image\_project](#input\_image\_project) | ID of project in which the resource belongs. | `string` | `"ubuntu-os-cloud"` | no |
 | <a name="input_initial_delay_sec"></a> [initial\_delay\_sec](#input\_initial\_delay\_sec) | The number of seconds that the managed instance group waits before it applies autohealing policies to new instances or recently recreated instances | `number` | `300` | no |
@@ -304,8 +300,12 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | <a name="input_postgres_maintenance_window"></a> [postgres\_maintenance\_window](#input\_postgres\_maintenance\_window) | Optional maintenance window settings for the Cloud SQL for PostgreSQL instance. | <pre>object({<br/>    day          = number<br/>    hour         = number<br/>    update_track = string<br/>  })</pre> | <pre>{<br/>  "day": 7,<br/>  "hour": 0,<br/>  "update_track": "stable"<br/>}</pre> | no |
 | <a name="input_postgres_ssl_mode"></a> [postgres\_ssl\_mode](#input\_postgres\_ssl\_mode) | Indicates whether to enforce TLS/SSL connections to the Cloud SQL for PostgreSQL instance. | `string` | `"ENCRYPTED_ONLY"` | no |
 | <a name="input_postgres_version"></a> [postgres\_version](#input\_postgres\_version) | PostgreSQL version to use. | `string` | `"POSTGRES_16"` | no |
+| <a name="input_project_id"></a> [project\_id](#input\_project\_id) | ID of GCP Project to create resources in. | `string` | n/a | yes |
 | <a name="input_recovery_key_name"></a> [recovery\_key\_name](#input\_recovery\_key\_name) | Name of an existing KMS recovery key to use for Boundary | `string` | `null` | no |
+| <a name="input_region"></a> [region](#input\_region) | Region of GCP Project to create resources in. | `string` | n/a | yes |
 | <a name="input_root_key_name"></a> [root\_key\_name](#input\_root\_key\_name) | Name of an existing KMS root key to use for Boundary | `string` | `null` | no |
+| <a name="input_subnet_name"></a> [subnet\_name](#input\_subnet\_name) | Existing VPC subnetwork for Boundary instance(s) and optionally Boundary frontend load balancer. | `string` | n/a | yes |
+| <a name="input_vpc"></a> [vpc](#input\_vpc) | Existing VPC network to deploy Boundary resources into. | `string` | n/a | yes |
 | <a name="input_vpc_project_id"></a> [vpc\_project\_id](#input\_vpc\_project\_id) | ID of GCP Project where the existing VPC resides if it is different than the default project. | `string` | `null` | no |
 | <a name="input_worker_key_name"></a> [worker\_key\_name](#input\_worker\_key\_name) | Name of an existing KMS worker key to use for Boundary | `string` | `null` | no |
 
