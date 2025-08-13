@@ -422,7 +422,7 @@ variable "postgres_kms_cmek_name" {
 variable "custom_user_data_template" {
   type        = string
   description = "(optional) Alternative template file to provide for instance template metadata script. place the file in your local `./templates folder` no path required"
-  default     = "boundary_custom__data.sh.tpl"
+  default     = "boundary_custom_data.sh.tpl"
   validation {
     condition     = can(fileexists("${path.cwd}/templates/${var.custom_user_data_template}") || fileexists("${path.module}/templates/${var.custom_user_data_template}"))
     error_message = "File `${path.cwd}/templates/${var.custom_user_data_template}` or `${path.module}/templates/${var.custom_user_data_template} not found or not readable"
