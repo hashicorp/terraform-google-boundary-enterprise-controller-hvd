@@ -13,7 +13,7 @@ BOUNDARY_DIR_LOGS="/var/log/boundary"
 BOUNDARY_DIR_BIN="${boundary_dir_bin}"
 BOUNDARY_USER="boundary"
 BOUNDARY_GROUP="boundary"
-BOUNDARY_INSTALL_URL="${boundary_install_url}"
+
 REQUIRED_PACKAGES="jq unzip"
 ADDITIONAL_PACKAGES="${additional_package_names}"
 
@@ -111,20 +111,20 @@ function directory_create {
   log "[INFO]" "Done creating necessary directories."
 }
 
-# install_boundary_binary downloads the Boundary binary and puts it in dedicated bin directory
-function install_boundary_binary {
-  log "[INFO]" "Installing Boundary binary to: $BOUNDARY_DIR_BIN..."
+# # install_boundary_binary downloads the Boundary binary and puts it in dedicated bin directory
+# function install_boundary_binary {
+#   log "[INFO]" "Installing Boundary binary to: $BOUNDARY_DIR_BIN..."
 
-  # Download the Boundary binary to the dedicated bin directory
-  sudo curl -so $BOUNDARY_DIR_BIN/boundary.zip $BOUNDARY_INSTALL_URL
+#   # Download the Boundary binary to the dedicated bin directory
+#   sudo curl -so $BOUNDARY_DIR_BIN/boundary.zip $BOUNDARY_INSTALL_URL
 
-  # Unzip the Boundary binary
-  sudo unzip $BOUNDARY_DIR_BIN/boundary.zip boundary -d $BOUNDARY_DIR_BIN
-  sudo unzip $BOUNDARY_DIR_BIN/boundary.zip -x boundary -d $BOUNDARY_DIR_LICENSE
-  sudo rm $BOUNDARY_DIR_BIN/boundary.zip
+#   # Unzip the Boundary binary
+#   sudo unzip $BOUNDARY_DIR_BIN/boundary.zip boundary -d $BOUNDARY_DIR_BIN
+#   sudo unzip $BOUNDARY_DIR_BIN/boundary.zip -x boundary -d $BOUNDARY_DIR_LICENSE
+#   sudo rm $BOUNDARY_DIR_BIN/boundary.zip
 
-  log "[INFO]" "Done installing Boundary binary."
-}
+#   log "[INFO]" "Done installing Boundary binary."
+# }
 
 function retrieve_license_from_secret_manager {
   local SECRET_ID="$1"
@@ -148,14 +148,14 @@ function retrieve_certs_from_secret_manager {
 
 function generate_boundary_config {
   log "[INFO]" "Generating $BOUNDARY_CONFIG_PATH file."
-  
+
   declare -l host
   host=$(hostname -s)
 
   cat >$BOUNDARY_CONFIG_PATH <<EOF
 disable_mlock = true
 
-telemetry { 
+telemetry {
   prometheus_retention_time = "24h"
   disable_hostname          = true
 }
@@ -167,7 +167,7 @@ controller {
   database {
     url = "postgresql://${boundary_database_user}:${boundary_database_password}@${boundary_database_host}/${boundary_database_name}?sslmode=require"
   }
-  
+
   license = "file:///$BOUNDARY_LICENSE_PATH"
 }
 
@@ -193,7 +193,7 @@ listener "tcp" {
   address            = "0.0.0.0:9203"
   purpose            = "ops"
   tls_disable        = ${boundary_tls_disable}
-  tls_cert_file      = "$BOUNDARY_DIR_TLS/cert.pem" 
+  tls_cert_file      = "$BOUNDARY_DIR_TLS/cert.pem"
   tls_key_file       = "$BOUNDARY_DIR_TLS/key.pem"
 %{ if boundary_tls_ca_bundle_secret_id != "NONE" ~}
   tls_client_ca_file   = "$BOUNDARY_DIR_TLS/bundle.pem"
@@ -295,10 +295,10 @@ function init_boundary_db {
 # start_enable_boundary starts and enables the boundary service
 function start_enable_boundary {
   log "[INFO]" "Starting and enabling the boundary service..."
-  
+
   sudo systemctl enable boundary
   sudo systemctl start boundary
-  
+
   log "[INFO]" "Done starting and enabling the boundary service."
 }
 

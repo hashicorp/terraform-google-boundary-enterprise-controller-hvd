@@ -23,7 +23,7 @@ locals {
     boundary_dir_bin     = "/usr/bin",
     boundary_dir_config  = "/etc/boundary.d",
     boundary_dir_home    = "/opt/boundary",
-    boundary_install_url = format("https://releases.hashicorp.com/boundary/%s/boundary_%s_linux_amd64.zip", var.boundary_version, var.boundary_version), boundary_tls_disable = var.boundary_tls_disable
+    boundary_tls_disable = var.boundary_tls_disable
 
     # Database settings
     boundary_database_host     = google_sql_database_instance.boundary.private_ip_address
