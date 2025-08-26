@@ -66,6 +66,7 @@ function detect_architecture {
     *)
       log "ERROR" "Unsupported architecture detected: '$OS_ARCH_DETECTED'. "
 		  exit_script 1
+			;;
   esac
 
   echo "$ARCHITECTURE"
