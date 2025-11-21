@@ -419,7 +419,15 @@ variable "postgres_kms_cmek_name" {
   description = "Name of Cloud KMS customer managed encryption key (CMEK) to use for Cloud SQL for PostgreSQL database instance."
   default     = null
 }
-
+variable "custom_user_data_template" {
+  type        = string
+  description = "(optional) Alternative template file to provide for instance template metadata script. place the file in your local `./templates folder` no path required"
+  default     = "boundary_custom_data.sh.tpl"
+  validation {
+    condition     = can(fileexists("${path.cwd}/templates/${var.custom_user_data_template}") || fileexists("${path.module}/templates/${var.custom_user_data_template}"))
+    error_message = "File `${path.cwd}/templates/${var.custom_user_data_template}` or `${path.module}/templates/${var.custom_user_data_template} not found or not readable"
+  }
+}
 #------------------------------------------------------------------------------
 # Google cloud storage (GCS) bucket for Boundary Session Recording
 #------------------------------------------------------------------------------
