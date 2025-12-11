@@ -1,4 +1,4 @@
-# Copyright (c) HashiCorp, Inc.
+# Copyright IBM Corp. 2024, 2025
 # SPDX-License-Identifier: MPL-2.0
 
 resource "random_id" "gcs_key_ring_suffix" {
