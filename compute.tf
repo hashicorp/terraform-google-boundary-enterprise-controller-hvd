@@ -5,6 +5,7 @@
 # User Data (cloud-init) arguments
 #-----------------------------------------------------------------------------------
 locals {
+  custom_user_data_template = fileexists("${path.cwd}/templates/${var.custom_user_data_template}") ? "${path.cwd}/templates/${var.custom_user_data_template}" : "${path.module}/templates/${var.custom_user_data_template}"
   custom_data_args = {
 
     # # https://developer.hashicorp.com/boundary/docs/configuration/controller
@@ -22,13 +23,13 @@ locals {
     boundary_dir_bin     = "/usr/bin",
     boundary_dir_config  = "/etc/boundary.d",
     boundary_dir_home    = "/opt/boundary",
-    boundary_install_url = format("https://releases.hashicorp.com/boundary/%s/boundary_%s_linux_amd64.zip", var.boundary_version, var.boundary_version), boundary_tls_disable = var.boundary_tls_disable
+    boundary_tls_disable = var.boundary_tls_disable
 
     # Database settings
     boundary_database_host     = google_sql_database_instance.boundary.private_ip_address
     boundary_database_name     = google_sql_database.boundary.name
     boundary_database_user     = google_sql_user.boundary.name
-    boundary_database_password = google_sql_user.boundary.password #nonsensitive(data.google_secret_manager_secret_version.boundary_database_password_secret_id[0].secret_data) 
+    boundary_database_password = google_sql_user.boundary.password #nonsensitive(data.google_secret_manager_secret_version.boundary_database_password_secret_id[0].secret_data)
 
     # KMS settings
     key_ring_project       = var.project_id
@@ -51,7 +52,7 @@ data "cloudinit_config" "boundary_cloudinit" {
   part {
     filename     = "boundary_custom_data.sh"
     content_type = "text/x-shellscript"
-    content      = templatefile("${path.module}/templates/boundary_custom_data.sh.tpl", local.custom_data_args)
+    content      = templatefile(local.custom_user_data_template, local.custom_data_args)
   }
 }
 

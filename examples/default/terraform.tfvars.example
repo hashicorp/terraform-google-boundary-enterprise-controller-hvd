@@ -1,9 +1,9 @@
 # ---Common --- #
 friendly_name_prefix = "<acme>" #This should be unique across all deployments
 common_labels = {
-  App   = "<boundary-controller>"
-  Env   = "<sandbox>"
-  Owner = "<YourName>"
+  app   = "<boundary-controller>"
+  env   = "<sandbox>"
+  owner = "<yourname>"
 }
 
 # --- prereqs --- #
