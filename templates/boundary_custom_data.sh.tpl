@@ -132,6 +132,8 @@ function retrieve_license_from_secret_manager {
   log "[INFO]" "Retrieving value of secret '$SECRET_ID' from Secret Manager."
   BOUNDARY_LICENSE=$(gcloud secrets versions access latest --secret="$SECRET_ID")
   echo "$BOUNDARY_LICENSE" >$BOUNDARY_LICENSE_PATH
+  chown $BOUNDARY_USER:$BOUNDARY_GROUP $BOUNDARY_LICENSE_PATH
+  chmod 640 $BOUNDARY_LICENSE_PATH
 }
 
 function retrieve_certs_from_secret_manager {
@@ -148,14 +150,14 @@ function retrieve_certs_from_secret_manager {
 
 function generate_boundary_config {
   log "[INFO]" "Generating $BOUNDARY_CONFIG_PATH file."
-  
+
   declare -l host
   host=$(hostname -s)
 
   cat >$BOUNDARY_CONFIG_PATH <<EOF
 disable_mlock = true
 
-telemetry { 
+telemetry {
   prometheus_retention_time = "24h"
   disable_hostname          = true
 }
@@ -167,7 +169,7 @@ controller {
   database {
     url = "postgresql://${boundary_database_user}:${boundary_database_password}@${boundary_database_host}/${boundary_database_name}?sslmode=require"
   }
-  
+
   license = "file:///$BOUNDARY_LICENSE_PATH"
 }
 
@@ -193,7 +195,7 @@ listener "tcp" {
   address            = "0.0.0.0:9203"
   purpose            = "ops"
   tls_disable        = ${boundary_tls_disable}
-  tls_cert_file      = "$BOUNDARY_DIR_TLS/cert.pem" 
+  tls_cert_file      = "$BOUNDARY_DIR_TLS/cert.pem"
   tls_key_file       = "$BOUNDARY_DIR_TLS/key.pem"
 %{ if boundary_tls_ca_bundle_secret_id != "NONE" ~}
   tls_client_ca_file   = "$BOUNDARY_DIR_TLS/bundle.pem"
@@ -291,14 +293,21 @@ function init_boundary_db {
   /usr/bin/boundary database init -skip-auth-method-creation -skip-host-resources-creation -skip-scopes-creation -skip-target-creation -config $BOUNDARY_CONFIG_PATH || true
   log "[INFO]" "Done initializing Boundary database."
 }
+# migrate_boundary_db runs the Boundary database migrations to ensure the database is up to date with the latest schema
+# This is necessary if the boundary database schema is not up to date
+function migrate_boundary_db {
+  log "[INFO]" "Migrating Boundary database..."
+  /usr/bin/boundary database migrate -config $BOUNDARY_CONFIG_PATH || true
+  log "[INFO]" "Done Migrating Boundary database."
+}
 
 # start_enable_boundary starts and enables the boundary service
 function start_enable_boundary {
   log "[INFO]" "Starting and enabling the boundary service..."
-  
+
   sudo systemctl enable boundary
   sudo systemctl start boundary
-  
+
   log "[INFO]" "Done starting and enabling the boundary service."
 }
 
@@ -331,6 +340,7 @@ function main {
   generate_boundary_config
   template_boundary_systemd
   init_boundary_db
+  migrate_boundary_db
   start_enable_boundary
   log "[INFO]" "Sleeping for a minute while Boundary initializes."
   sleep 60
