@@ -4,9 +4,9 @@ Terraform module aligned with HashiCorp Validated Designs (HVD) to deploy Bounda
 
 <!-- ## Boundary Architecture
 
-This diagram shows a Boundary deployment with one controller and two sets of Boundary Workers, one for ingress and another for egress. Please review [Boundary deployment customizations doc](./docs/deployment-customizations.md) to understand different deployment settings for the Boundary deployment. diagram wip
+This diagram shows a Boundary deployment with one controller and two sets of Boundary Workers, one for ingress and another for egress. Please review [Boundary deployment customizations doc](https://github.com/hashicorp/terraform-google-boundary-enterprise-controller-hvd/blob/0.2.0/docs/deployment-customizations.md) to understand different deployment settings for the Boundary deployment. diagram wip
 
-![Boundary on Google](./docs/images/boundary-diagram.png) -->
+![Boundary on Google](https://github.com/hashicorp/terraform-google-boundary-enterprise-controller-hvd/blob/0.2.0/docs/images/boundary-diagram.png) -->
 
 ## Prerequisites
 
@@ -45,7 +45,7 @@ This diagram shows a Boundary deployment with one controller and two sets of Bou
 - **Boundary TLS certificate private key** - file in PEM format, base64-encoded into a string, and stored as a plaintext secret.
 - **TLS CA bundle** - file in PEM format, base64-encoded into a string, and stored as a plaintext secret.
 
->📝 Note: see the [Boundary cert rotation docs](./docs/boundary-cert-rotation.md) for instructions on how to base64-encode the certificates with proper formatting.
+>📝 Note: see the [Boundary cert rotation docs](https://github.com/hashicorp/terraform-google-boundary-enterprise-controller-hvd/blob/0.2.0/docs/boundary-cert-rotation.md) for instructions on how to base64-encode the certificates with proper formatting.
 
 ### Compute
 
@@ -58,7 +58,7 @@ One of the following mechanisms for shell access to Boundary VM instances:
 
 1. Create/configure/validate the applicable [prerequisites](#prerequisites).
 
-1. Nested within the [examples](./examples/) directory are subdirectories that contain ready-made Terraform configurations of example scenarios for how to call and deploy this module. To get started, choose an example scenario. If you are not sure which example scenario to start with, then we recommend starting with the [default](examples/default) example.
+1. Nested within the [examples](https://github.com/hashicorp/terraform-google-boundary-enterprise-controller-hvd/blob/0.2.0/examples/) directory are subdirectories that contain ready-made Terraform configurations of example scenarios for how to call and deploy this module. To get started, choose an example scenario. If you are not sure which example scenario to start with, then we recommend starting with the [default](https://github.com/hashicorp/terraform-google-boundary-enterprise-controller-hvd/blob/0.2.0/examples/default) example.
 
 1. Copy all of the Terraform files from your example scenario of choice into a new destination directory to create your root Terraform configuration that will manage your Boundary deployment. If you are not sure where to create this new directory, it is common for us to see users create an `environments/` directory at the root of this repo, and then a subdirectory for each Boundary instance deployment, like so:
 
